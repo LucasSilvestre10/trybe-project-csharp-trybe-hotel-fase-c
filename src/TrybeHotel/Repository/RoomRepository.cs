@@ -1,5 +1,6 @@
 using TrybeHotel.Models;
 using TrybeHotel.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace TrybeHotel.Repository
 {
@@ -13,54 +14,73 @@ namespace TrybeHotel.Repository
 
         public IEnumerable<RoomDto> GetRooms(int HotelId)
         {
-            var result = _context.Rooms.Where(room => room.HotelId == HotelId).Select(selRoom => new RoomDto
-            {
-                RoomId = selRoom.RoomId,
-                Capacity = selRoom.Capacity,
-                Name = selRoom.Name,
-                Image = selRoom.Image,
-                Hotel = _context.Hotels.Where(hotel => hotel.HotelId == HotelId).Select(selHotel => new HotelDto
+            var result = _context.Rooms
+                .Where(r => r.HotelId == HotelId)
+                .ToList()
+                .Select(r =>
                 {
-                    HotelId = selHotel.HotelId,
-                    CityId = selHotel.CityId,
-                    Name = selHotel.Name,
-                    Address = selHotel.Address,
-                    CityName = _context.Cities.Where(city => city.CityId == selHotel.CityId).Select(selCity => selCity.Name).FirstOrDefault(),
-                    State = _context.Cities.Where(city => city.CityId == selHotel.CityId).Select(selCity => selCity.State).FirstOrDefault()
-                }).FirstOrDefault()
-            }).ToList();
+                    var hotel = _context.Hotels.FirstOrDefault(h => h.HotelId == r.HotelId);
+                    var cityName = _context.Cities
+                        .Where(c => c.CityId == hotel!.CityId)
+                        .FirstOrDefault();
+
+                    return new RoomDto
+                    {
+                        RoomId = r.RoomId,
+                        Name = r.Name,
+                        Capacity = r.Capacity,
+                        Image = r.Image,
+                        Hotel = new HotelDto
+                        {
+                            HotelId = hotel!.HotelId,
+                            Name = hotel.Name,
+                            Address = hotel.Address,
+                            CityId = hotel.CityId,
+                            CityName = cityName!.Name,
+                            State = cityName!.State
+                        }
+                    };
+                });
+
             return result;
         }
+
 
         public RoomDto AddRoom(Room room)
         {
             _context.Rooms.Add(room);
             _context.SaveChanges();
-            var newRoom = new RoomDto
+
+            var hotel = _context.Hotels.FirstOrDefault(h => h.HotelId == room.HotelId);
+
+            var cityName = _context.Cities.Where(c => c.CityId == hotel!.CityId).FirstOrDefault();
+
+            return new RoomDto
             {
                 RoomId = room.RoomId,
-                Capacity = room.Capacity,
                 Name = room.Name,
+                Capacity = room.Capacity,
                 Image = room.Image,
-                Hotel = _context.Hotels.Where(hotel => hotel.HotelId == room.HotelId).Select(selHotel => new HotelDto
+                Hotel = new HotelDto
                 {
-                    HotelId = selHotel.HotelId,
-                    CityId = selHotel.CityId,
-                    Name = selHotel.Name,
-                    Address = selHotel.Address,
-                    CityName = _context.Cities.Where(city => city.CityId == selHotel.CityId).Select(selCity => selCity.Name).FirstOrDefault()
-                }).FirstOrDefault()
+                    HotelId = hotel!.HotelId,
+                    Name = hotel.Name,
+                    Address = hotel.Address,
+                    CityId = hotel.CityId,
+                    CityName = cityName!.Name,
+                    State = cityName!.State
+                }
             };
-            return newRoom;
         }
+
 
         public void DeleteRoom(int RoomId)
         {
-            var result = _context.Rooms.Where(selRoom => selRoom.RoomId == RoomId).FirstOrDefault();
+            var result = _context.Rooms.FirstOrDefault(r => r.RoomId == RoomId);
+
             if (result == null)
-            {
-                return;
-            }
+                throw new Exception("Room not found");
+
             _context.Rooms.Remove(result);
             _context.SaveChanges();
         }
