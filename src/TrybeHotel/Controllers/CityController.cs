@@ -29,5 +29,18 @@ namespace TrybeHotel.Controllers
             var result = _repository.AddCity(city);
             return Created("", result);
         }
+
+              [HttpPut]
+        public IActionResult PutCity([FromBody] City city)        {
+           
+          
+            var updateCity = _repository.UpdateCity(city);
+            if (updateCity == null)
+            {
+                return NotFound(new { message = "City not found" });
+            }
+            return Ok(updateCity);
+        }
     }
 }
+    
