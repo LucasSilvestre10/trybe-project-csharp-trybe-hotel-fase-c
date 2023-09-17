@@ -25,7 +25,8 @@ namespace TrybeHotel.Repository
                     CityId = selHotel.CityId,
                     Name = selHotel.Name,
                     Address = selHotel.Address,
-                    CityName = _context.Cities.Where(city => city.CityId == selHotel.CityId).Select(selCity => selCity.Name).FirstOrDefault()
+                    CityName = _context.Cities.Where(city => city.CityId == selHotel.CityId).Select(selCity => selCity.Name).FirstOrDefault(),
+                    State = _context.Cities.Where(city => city.CityId == selHotel.CityId).Select(selCity => selCity.State).FirstOrDefault()
                 }).FirstOrDefault()
             }).ToList();
             return result;
