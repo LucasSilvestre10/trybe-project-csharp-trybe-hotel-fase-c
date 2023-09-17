@@ -10,4 +10,5 @@ public class Hotel
   public int CityId { get; set; }
   public ICollection<Room>? Rooms { get; set; }
   public City? City { get; set; }
+  
 }

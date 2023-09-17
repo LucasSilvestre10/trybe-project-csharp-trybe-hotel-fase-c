@@ -19,6 +19,8 @@ namespace TrybeHotel.Repository
                 CityId = hotel.CityId,
                 Name = hotel.Name,
                 Address = hotel.Address,
+                CityName = _context.Cities.Where(city => city.CityId == hotel.CityId).Select(city => city.Name).FirstOrDefault(),
+                State = _context.Cities.Where(city => city.CityId == hotel.CityId).Select(city => city.State).FirstOrDefault(),
             }).ToList();
             return hotels;
         }
@@ -33,7 +35,8 @@ namespace TrybeHotel.Repository
                 CityId = hotel.CityId,
                 Name = hotel.Name,
                 Address = hotel.Address,
-                CityName = _context.Cities.Where(city => city.CityId == hotel.CityId).Select(selCity => selCity.Name).FirstOrDefault()
+                CityName = _context.Cities.Where(city => city.CityId == hotel.CityId).Select(city => city.Name).FirstOrDefault(),
+                State = _context.Cities.Where(city => city.CityId == hotel.CityId).Select(city => city.State).FirstOrDefault(),
             };
             return result;
 
